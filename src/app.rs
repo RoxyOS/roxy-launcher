@@ -1,10 +1,11 @@
-use crate::{game::launch, profile::Profile};
+use crate::{error::RoxyError, profile::Profile};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct RoxyLauncher {
     profile: String,
+    message: Option<String>,
 }
 
 impl RoxyLauncher {
@@ -31,59 +32,20 @@ impl eframe::App for RoxyLauncher {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
-        // For inspiration and more examples, go to https://emilk.github.io/egui
+        ui.label("Profile: ");
+        ui.text_edit_singleline(&mut self.profile);
 
-        egui::Panel::top("top_panel").show_inside(ui, |ui| {
-            // The top panel is often a good place for a menu bar:
+        if let Some(message) = &self.message {
+            ui.label(message);
+        }
 
-            egui::MenuBar::new().ui(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    if ui.button("Quit").clicked() {
-                        ui.send_viewport_cmd(egui::ViewportCommand::Close);
-                    }
-                });
-                ui.add_space(16.0);
-
-                egui::widgets::global_theme_preference_buttons(ui);
-            });
-        });
-
-        egui::CentralPanel::default().show_inside(ui, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("eframe template");
-
-            ui.horizontal(|ui| {
-                ui.label("Profile: ");
-                ui.text_edit_singleline(&mut self.profile);
-            });
-
-            ui.menu_button("Play", |ui| {
-                if ui.button("Play").clicked() {
-                    launch(Profile {
-                        name: self.profile.clone(),
-                    });
+        ui.menu_button("Play", |ui| {
+            if ui.button("Play").clicked() {
+                match Profile(self.profile.clone()).launch() {
+                    Ok(()) => self.message = Some("Starting game".into()),
+                    Err(err) => self.message = Some(err.to_string()),
                 }
-            });
-
-            ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                powered_by_egui_and_eframe(ui);
-                egui::warn_if_debug_build(ui);
-            });
+            }
         });
     }
-}
-
-fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 0.0;
-        ui.label("Powered by ");
-        ui.hyperlink_to("egui", "https://github.com/emilk/egui");
-        ui.label(" and ");
-        ui.hyperlink_to(
-            "eframe",
-            "https://github.com/emilk/egui/tree/master/crates/eframe",
-        );
-        ui.label(".");
-    });
 }
