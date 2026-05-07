@@ -33,7 +33,9 @@ impl Profile {
     fn copy_profile_to_game(&self) -> RoxyResult {
         let dest = mods_dir();
         let src = self.path();
-        let options = fs_extra::dir::CopyOptions::new().overwrite(true);
+        let options = fs_extra::dir::CopyOptions::new()
+            .overwrite(true)
+            .content_only(true);
 
         fs_extra::dir::copy(src, dest, &options)?;
 
