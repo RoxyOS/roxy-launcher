@@ -1,3 +1,5 @@
+use egui::CentralPanel;
+
 use crate::{error::RoxyError, profile::Profile};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -32,6 +34,7 @@ impl eframe::App for RoxyLauncher {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        CentralPanel::default().show_inside(ui, |ui| {
         ui.label("Profile: ");
         ui.text_edit_singleline(&mut self.profile);
 
@@ -47,5 +50,6 @@ impl eframe::App for RoxyLauncher {
                     Err(err) => self.message = Some(err.to_string()),
                 }
         }
+        });
     }
 }
