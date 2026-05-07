@@ -37,6 +37,8 @@ impl Profile {
             .overwrite(true)
             .content_only(true);
 
+        fs_extra::dir::remove(&dest)?;
+
         fs_extra::dir::copy(src, dest, &options)?;
 
         Ok(())
