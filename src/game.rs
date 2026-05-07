@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{env::home_dir, fs, path::PathBuf};
 
 use crate::{
     error::{RoxyError, RoxyResult},
@@ -7,7 +7,12 @@ use crate::{
 };
 
 const STS_GAME_ID: u32 = 2868840;
-const GAME_DIR: &str = "~/.local/share/Steam/steamapps/common/Slay the Spire 2/";
+fn mods_dir() -> PathBuf {
+    home_dir()
+        .unwrap()
+        .join(".local/share/Steam/steamapps/common/Slay the Spire 2")
+        .join("mods")
+}
 
 impl Profile {
     pub fn launch(&self) -> RoxyResult {
@@ -26,7 +31,7 @@ impl Profile {
     }
 
     fn copy_profile_to_game(&self) -> RoxyResult {
-        let dest = PathBuf::from(GAME_DIR).join("mods");
+        let dest = mods_dir();
         let src = self.path();
         let options = fs_extra::dir::CopyOptions::new().overwrite(true);
 

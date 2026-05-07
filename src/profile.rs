@@ -1,8 +1,6 @@
-use std::path::PathBuf;
+use std::{env::home_dir, path::PathBuf};
 
 use tap::Tap;
-
-use crate::LAUNCHER_DATA;
 
 pub struct Profile(pub String);
 
@@ -14,6 +12,6 @@ impl From<String> for Profile {
 
 impl Profile {
     pub fn path(&self) -> PathBuf {
-        PathBuf::from(LAUNCHER_DATA).join(self.0.clone())
+        home_dir().unwrap().join(".roxybestgirl").join(&self.0)
     }
 }
