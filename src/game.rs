@@ -7,6 +7,7 @@ use crate::{
 };
 
 const STS_GAME_ID: u32 = 2868840;
+
 fn mods_dir() -> PathBuf {
     home_dir()
         .unwrap()
