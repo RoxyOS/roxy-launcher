@@ -1,7 +1,7 @@
 use egui::CentralPanel;
 use egui_notify::Toasts;
 
-use crate::{error::RoxyError, profile::Profile};
+use crate::profile::Profile;
 
 #[derive(Default)]
 pub struct RoxyLauncher {

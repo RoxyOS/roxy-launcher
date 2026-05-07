@@ -1,6 +1,5 @@
 use std::{env::home_dir, path::PathBuf};
 
-use tap::Tap;
 
 pub struct Profile(pub String);
 
