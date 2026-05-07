@@ -17,6 +17,7 @@ fn main() -> eframe::Result {
                 )
                 .expect("Failed to load icon"),
             ),
+        renderer: eframe::Renderer::Glow,
         ..Default::default()
     };
     eframe::run_native(
