@@ -39,15 +39,13 @@ impl eframe::App for RoxyLauncher {
             ui.label(message);
         }
 
-        ui.menu_button("Play", |ui| {
-            if ui.button("Play").clicked() {
-                match Profile(self.profile.clone()).launch() {
+        if ui.button("Play").clicked() {
+            match Profile(self.profile.clone()).launch() {
                     Ok(()) => {
                         self.message = Some("Game started. this might take a long time due to the launcher is starting sts2 via steam.".into())
                     }
                     Err(err) => self.message = Some(err.to_string()),
                 }
-            }
-        });
+        }
     }
 }
