@@ -1,6 +1,5 @@
 use std::{env::home_dir, path::PathBuf};
 
-
 pub struct Profile(pub String);
 
 impl From<String> for Profile {
