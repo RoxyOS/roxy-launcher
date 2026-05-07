@@ -37,6 +37,6 @@ impl Profile {
 }
 
 fn launch_raw() -> RoxyResult {
-    launch_steam_game(STS_GAME_ID).unwrap();
+    launch_steam_game(STS_GAME_ID).map_err(|_| RoxyError::GameNotInstalled)?;
     Ok(())
 }
