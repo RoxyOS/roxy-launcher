@@ -12,3 +12,4 @@ serde = { version = "1.0.219", features = ["derive"] }
 tap = "1.0"
 open = "5"
 fs_extra = "1.3"
+egui-notify = "0.22"

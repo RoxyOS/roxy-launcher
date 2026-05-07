@@ -1,11 +1,13 @@
 use egui::CentralPanel;
+use egui_notify::Toasts;
 
 use crate::{error::RoxyError, profile::Profile};
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct RoxyLauncher {
     profile: String,
     message: Option<String>,
+    toasts: Toasts,
 }
 
 impl RoxyLauncher {
@@ -28,11 +30,13 @@ impl eframe::App for RoxyLauncher {
         if ui.button("Play").clicked() {
             match Profile(self.profile.clone()).launch() {
                 Ok(()) => {
-                    self.message = Some("Game started. this might take a long time due to the launcher is starting sts2 via steam.".into())
+                    self.toasts.success("Game started. this might take a long time due to the launcher is starting sts2 via steam.");
                 }
-                Err(err) => self.message = Some(err.to_string()),
+                Err(err) => {self.toasts.error(err.to_string());},
             }
         }
         });
+
+        self.toasts.show(ui.ctx());
     }
 }
