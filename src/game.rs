@@ -3,7 +3,7 @@ use std::{env::home_dir, fs, path::PathBuf};
 use crate::{
     error::{RoxyError, RoxyResult},
     profile::Profile,
-    utils::launch_steam_game,
+    utils::{LaunchResult, launch_steam_game},
 };
 
 const STS_GAME_ID: u32 = 2868840;
@@ -31,11 +31,11 @@ fn copy_profile_contents(src: &std::path::Path, dest: &std::path::Path) -> RoxyR
 }
 
 impl Profile {
-    pub fn launch(&self) -> RoxyResult {
+    pub fn launch(&self, launch_result: LaunchResult) -> RoxyResult {
         self.ensure_valid_name()?;
         self.ensure_profile_exist()?;
         self.copy_profile_to_game()?;
-        launch_raw()?;
+        launch_raw(launch_result)?;
         Ok(())
     }
 
@@ -50,8 +50,8 @@ impl Profile {
     }
 }
 
-fn launch_raw() -> RoxyResult {
-    launch_steam_game(STS_GAME_ID).map_err(|_| RoxyError::GameNotInstalled)?;
+fn launch_raw(launch_result: LaunchResult) -> RoxyResult {
+    launch_steam_game(STS_GAME_ID, launch_result).map_err(|_| RoxyError::GameNotInstalled)?;
     Ok(())
 }
 

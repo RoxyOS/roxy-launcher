@@ -1,10 +1,19 @@
-use std::thread;
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+};
 
-pub fn launch_steam_game(app_id: u32) -> Result<(), Box<dyn std::error::Error>> {
+use crate::error::RoxyResult;
+
+pub fn launch_steam_game(
+    app_id: u32,
+    launch_result: LaunchResult,
+) -> Result<(), Box<dyn std::error::Error>> {
     let url = format!("steam://run/{app_id}");
-    thread::spawn(|| {
-        // TODO: send result
-        let _ = open::that(url);
+    thread::spawn(move || {
+        *launch_result.lock().unwrap() = Some(open::that(url).map_err(Into::into));
     });
     Ok(())
 }
+
+pub type LaunchResult = Arc<Mutex<Option<RoxyResult>>>;
