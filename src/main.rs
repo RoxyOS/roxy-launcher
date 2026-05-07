@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use roxy_launcher::TemplateApp;
+use roxy_launcher::RoxyLauncher;
 
 fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
@@ -20,6 +20,6 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "eframe template",
         native_options,
-        Box::new(|cc| Ok(Box::new(TemplateApp::new(cc)))),
+        Box::new(|cc| Ok(Box::new(RoxyLauncher::new(cc)))),
     )
 }
