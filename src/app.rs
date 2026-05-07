@@ -1,12 +1,10 @@
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
-#[derive(serde::Deserialize, serde::Serialize)]
-#[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct RoxyLauncher {}
+use crate::{game::launch, profile::Profile};
 
-impl Default for RoxyLauncher {
-    fn default() -> Self {
-        Self {}
-    }
+/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+#[derive(serde::Deserialize, serde::Serialize, Default)]
+#[serde(default)] // if we add new fields, give them default values when deserializing old state
+pub struct RoxyLauncher {
+    profile: String,
 }
 
 impl RoxyLauncher {
@@ -56,21 +54,17 @@ impl eframe::App for RoxyLauncher {
             ui.heading("eframe template");
 
             ui.horizontal(|ui| {
-                ui.label("Write something: ");
-                ui.text_edit_singleline(&mut self.label);
+                ui.label("Profile: ");
+                ui.text_edit_singleline(&mut self.profile);
             });
 
-            ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1.0;
-            }
-
-            ui.separator();
-
-            ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/main/",
-                "Source code."
-            ));
+            ui.menu_button("Play", |ui| {
+                if ui.button("Play").clicked() {
+                    launch(Profile {
+                        name: self.profile.clone(),
+                    });
+                }
+            });
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
