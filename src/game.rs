@@ -70,6 +70,7 @@ mod tests {
     use tempfile::tempdir;
 
     use super::*;
+    use crate::utils::new_launch_result;
 
     #[test]
     fn mods_dir_is_nested_under_expected_game_path() {
@@ -146,5 +147,30 @@ mod tests {
             ensure_profile_exists(&missing),
             Err(RoxyError::ProfileDontExist)
         ));
+    }
+
+    #[test]
+    fn launch_rejects_invalid_profile_name_without_touching_launch_result() {
+        let profile = Profile("../escape".into());
+        let launch_result = new_launch_result();
+
+        assert!(matches!(
+            profile.launch(launch_result.clone()),
+            Err(RoxyError::InvalidProfileName)
+        ));
+        assert!(launch_result.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn launch_rejects_missing_profile_without_touching_launch_result() {
+        let tmp = tempdir().unwrap();
+        let missing = tmp.path().join("missing-profile");
+        let launch_result = new_launch_result();
+
+        assert!(matches!(
+            ensure_profile_exists(&missing),
+            Err(RoxyError::ProfileDontExist)
+        ));
+        assert!(launch_result.lock().unwrap().is_none());
     }
 }

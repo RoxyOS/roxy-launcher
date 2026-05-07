@@ -17,3 +17,19 @@ pub fn launch_steam_game(
 }
 
 pub type LaunchResult = Arc<Mutex<Option<RoxyResult>>>;
+
+pub fn new_launch_result() -> LaunchResult {
+    Arc::new(Mutex::new(None))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_launch_result_starts_empty() {
+        let launch_result = new_launch_result();
+
+        assert!(launch_result.lock().unwrap().is_none());
+    }
+}
