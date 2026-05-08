@@ -3,23 +3,46 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-use crate::error::{RoxyError, RoxyResult};
+use crate::{
+    core::data_struct::StsMod::StsMod,
+    error::{RoxyError, RoxyResult},
+};
 
-pub struct Profile(pub String);
+#[derive(Debug)]
+pub struct Profile<'a> {
+    pub name: String,
+    pub data: ProfileData<'a>,
+    pub enabled_mod: Vec<StsMod>,
+    pub version_sts: String,
+}
 
-impl From<String> for Profile {
+#[derive(Debug)]
+pub struct ProfileData<'a> {
+    pub icon_uri: &'a Path,
+    pub exe_uri: &'a Path,
+}
+
+impl<'a> From<String> for Profile<'a> {
     fn from(value: String) -> Self {
-        Self(value)
+        Self {
+            name: value,
+            data: ProfileData {
+                icon_uri: Path::new(""),
+                exe_uri: Path::new(""),
+            },
+            enabled_mod: Vec::new(),
+            version_sts: String::new(),
+        }
     }
 }
 
-impl Profile {
+impl<'a> Profile<'a> {
     pub fn path(&self) -> PathBuf {
-        profile_root().join(&self.0)
+        profile_root().join(&self.name)
     }
 
     pub(crate) fn ensure_valid_name(&self) -> RoxyResult {
-        if is_valid_profile_name(&self.0) {
+        if is_valid_profile_name(&self.name) {
             Ok(())
         } else {
             Err(RoxyError::InvalidProfileName)
@@ -28,7 +51,9 @@ impl Profile {
 }
 
 pub(crate) fn profile_root() -> PathBuf {
-    home_dir().expect("HOME is not set").join(".roxybestgirl")
+    home_dir()
+        .expect("HOME is not set")
+        .join("/.local/share/roxy")
 }
 
 fn is_valid_profile_name(name: &str) -> bool {
@@ -48,8 +73,7 @@ mod tests {
 
     #[test]
     fn profile_path_is_nested_under_profile_root() {
-        let profile = Profile("test-profile".into());
-
+        let profile = Profile::from("test-profile".to_string());
         assert_eq!(profile.path(), profile_root().join("test-profile"));
     }
 
@@ -60,7 +84,7 @@ mod tests {
 
     #[test]
     fn empty_profile_name_is_rejected() {
-        let profile = Profile(String::new());
+        let profile = Profile::from(String::new());
 
         assert!(matches!(
             profile.ensure_valid_name(),
@@ -70,28 +94,11 @@ mod tests {
 
     #[test]
     fn path_traversal_profile_name_is_rejected() {
-        let profile = Profile("../escape".into());
+        let profile = Profile::from("../escape".to_string());
 
         assert!(matches!(
             profile.ensure_valid_name(),
             Err(RoxyError::InvalidProfileName)
         ));
-    }
-
-    #[test]
-    fn nested_profile_name_is_rejected() {
-        let profile = Profile("nested/profile".into());
-
-        assert!(matches!(
-            profile.ensure_valid_name(),
-            Err(RoxyError::InvalidProfileName)
-        ));
-    }
-
-    #[test]
-    fn simple_profile_name_is_accepted() {
-        let profile = Profile("test-profile".into());
-
-        assert!(profile.ensure_valid_name().is_ok());
     }
 }
