@@ -30,7 +30,7 @@ fn copy_profile_contents(src: &std::path::Path, dest: &std::path::Path) -> RoxyR
     Ok(())
 }
 
-impl Profile {
+impl<'a> Profile<'a> {
     pub fn launch(&self, launch_result: LaunchResult) -> RoxyResult {
         self.ensure_valid_name()?;
         self.ensure_profile_exist()?;
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn launch_rejects_invalid_profile_name_without_touching_launch_result() {
-        let profile = Profile("../escape".into());
+        let profile = Profile::from("../escape".to_string());
         let launch_result = new_launch_result();
 
         assert!(matches!(

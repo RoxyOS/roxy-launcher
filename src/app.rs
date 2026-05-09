@@ -1,23 +1,38 @@
+use std::{
+    default,
+    env::home_dir,
+    fs,
+    path::{Path, PathBuf},
+    sync::{Mutex, OnceLock},
+};
+
 use egui::{Button, CentralPanel};
 use egui_notify::Toasts;
 
 use crate::{
+    core::boot::on_booting,
     error::RoxyResult,
-    profile::Profile,
+    profile::{Profile, profile_root},
+    ui,
     utils::{LaunchResult, new_launch_result},
 };
 
-pub struct RoxyLauncher {
-    profile: String,
-    message: Option<String>,
-    toasts: Toasts,
-    launch_result: LaunchResult,
-    launching: bool,
+pub static DEFAULT_LAUNCHER_DIR: &'static str = "~/.local/share/roxy";
+
+pub struct RoxyLauncher<'a> {
+    pub current_profile: Profile<'a>,
+    pub message: Option<String>,
+    pub toasts: Toasts,
+    pub launch_result: LaunchResult,
+    pub launching: bool,
 }
 
-impl RoxyLauncher {
+impl<'a> RoxyLauncher<'a> {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let _ = cc;
+        if !profile_root().exists() {
+            fs::create_dir_all(profile_root());
+        }
         Default::default()
     }
 
@@ -30,45 +45,19 @@ impl RoxyLauncher {
     }
 }
 
-impl eframe::App for RoxyLauncher {
+impl<'a> eframe::App for RoxyLauncher<'a> {
+    fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        on_booting(self);
+    }
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        CentralPanel::default().show_inside(ui, |ui| {
-            ui.label("Profile: ");
-            ui.text_edit_singleline(&mut self.profile);
-
-            if let Some(message) = &self.message {
-                ui.label(message);
-            }
-
-            let play_button = ui.add_enabled(!self.launching, Button::new("Play"));
-
-            if play_button.clicked() {
-                self.launching = true;
-                match Profile(self.profile.clone()).launch(self.launch_result.clone()) {
-                    Ok(()) => {
-                        self.toasts.info("Starting game");
-                    }
-                    Err(err) => {
-                        self.toasts.error(err.to_string());
-                        self.launching = false;
-                    }
-                }
-            }
-
-            let launch_result = self.launch_result.lock().unwrap().take();
-            if let Some(launch_result) = launch_result {
-                self.finish_launch(launch_result);
-            }
-        });
-
-        self.toasts.show(ui.ctx());
+        egui::Panel::top("menubar").show_inside(ui, |ui| ui::toolbar::show(ui));
     }
 }
 
-impl Default for RoxyLauncher {
+impl<'a> Default for RoxyLauncher<'a> {
     fn default() -> Self {
         Self {
-            profile: String::new(),
+            current_profile: Profile::from("default".to_string()),
             message: None,
             toasts: Toasts::default(),
             launch_result: new_launch_result(),

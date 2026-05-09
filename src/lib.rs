@@ -1,9 +1,11 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
 mod app;
+pub mod core;
 mod error;
 mod game;
 mod profile;
-mod utils;
+pub mod ui;
+pub mod utils;
 
 pub use app::RoxyLauncher;

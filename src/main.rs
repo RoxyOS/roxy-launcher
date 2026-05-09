@@ -1,10 +1,20 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use roxy_launcher::RoxyLauncher;
+use roxy_launcher::{
+    RoxyLauncher,
+    utils::{logger_util, path_util},
+};
 
 const TITLE: &str = "Roxy Launcher";
+static DEFUALT_LOG_PATH: &str = "~/.local/state/roxy/log.log";
 
-fn main() -> eframe::Result {
+#[tokio::main]
+async fn main() -> eframe::Result {
+    logger_util::init_logging(
+        path_util::expand_home_dir_string(DEFUALT_LOG_PATH.to_string()).as_str(),
+        true,
+    )
+    .await;
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([400.0, 300.0])
