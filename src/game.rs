@@ -30,7 +30,7 @@ fn copy_profile_contents(src: &std::path::Path, dest: &std::path::Path) -> RoxyR
     Ok(())
 }
 
-impl<'a> Profile<'a> {
+impl<'a> Profile {
     pub fn launch(&self, launch_result: LaunchResult) -> RoxyResult {
         self.ensure_valid_name()?;
         self.ensure_profile_exist()?;

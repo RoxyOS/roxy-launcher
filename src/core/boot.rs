@@ -2,7 +2,7 @@ use std::{fs, path::Path};
 
 use egui::Context;
 
-use crate::{RoxyLauncher, app, utils::path_util};
+use crate::{RoxyLauncher, app, profile::Profile, utils::path_util};
 
 pub fn on_booting(app: &mut RoxyLauncher) {
     let path_data_dir_string =
@@ -17,4 +17,5 @@ pub fn on_booting(app: &mut RoxyLauncher) {
             e
         ));
     }
+    app.profiles = Profile::load_all().unwrap_or_default();
 }

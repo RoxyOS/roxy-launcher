@@ -12,27 +12,28 @@ use egui_notify::Toasts;
 use crate::{
     core::boot::on_booting,
     error::RoxyResult,
-    profile::{Profile, profile_root},
+    profile::Profile,
     ui,
     utils::{LaunchResult, new_launch_result},
 };
 
 pub static DEFAULT_LAUNCHER_DIR: &'static str = "~/.local/share/roxy";
 
-pub struct RoxyLauncher<'a> {
-    pub current_profile: Profile<'a>,
+pub struct RoxyLauncher {
     pub message: Option<String>,
     pub toasts: Toasts,
     pub launch_result: LaunchResult,
     pub launching: bool,
+    pub profiles: Vec<Profile>,
 }
 
-impl<'a> RoxyLauncher<'a> {
+impl<'a> RoxyLauncher {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let _ = cc;
-        if !profile_root().exists() {
-            fs::create_dir_all(profile_root());
+        if !Profile::profile_root().exists() {
+            fs::create_dir_all(Profile::profile_root());
         }
+
         Default::default()
     }
 
@@ -45,7 +46,7 @@ impl<'a> RoxyLauncher<'a> {
     }
 }
 
-impl<'a> eframe::App for RoxyLauncher<'a> {
+impl<'a> eframe::App for RoxyLauncher {
     fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         on_booting(self);
     }
@@ -54,14 +55,14 @@ impl<'a> eframe::App for RoxyLauncher<'a> {
     }
 }
 
-impl<'a> Default for RoxyLauncher<'a> {
+impl<'a> Default for RoxyLauncher {
     fn default() -> Self {
         Self {
-            current_profile: Profile::from("default".to_string()),
             message: None,
             toasts: Toasts::default(),
             launch_result: new_launch_result(),
             launching: false,
+            profiles: vec![],
         }
     }
 }
