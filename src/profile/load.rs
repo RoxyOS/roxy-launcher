@@ -9,7 +9,7 @@ use crate::{
 
 impl Profile {
     pub fn load(path: &Path) -> RoxyResult<Self> {
-        match fs::read_to_string(path) {
+        match fs::read_to_string(path.join("profile.toml")) {
             Ok(content) => {
                 let result = match toml::from_str(&content) {
                     Ok(ok) => ok,

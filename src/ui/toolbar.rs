@@ -1,28 +1,49 @@
 use egui::Ui;
 
-pub fn show(ui: &mut Ui) {
-    let menu_bar = egui::MenuBar::new();
-    menu_bar.ui(ui, |ui| {
-        ui.menu_button("Instance", |ui| {
-            if ui.button("Play").clicked() {
-                todo!();
-            }
-            ui.separator();
-            if ui.button("Edit").clicked() {
-                todo!();
-            }
-            ui.separator();
-            if ui.button("Dublicate").clicked() {
-                todo!();
-            }
-            if ui.button("Delete").clicked() {
-                todo!();
-            }
+use crate::ui::dialogs::RoxyAction;
+
+#[derive(Default, Debug)]
+pub struct ToolBar {}
+
+pub enum ToolBarAction {
+    Create,
+    Edit,
+    Delete,
+    Play,
+    Help,
+    Duplicate,
+}
+
+impl ToolBar {
+    pub fn show(&mut self, ui: &mut Ui) -> Option<RoxyAction> {
+        let menu_bar = egui::MenuBar::new();
+        let mut result = None;
+        menu_bar.ui(ui, |ui| {
+            ui.menu_button("Instance", |ui| {
+                if ui.button("Play").clicked() {
+                    result = Some(RoxyAction::ToolBarPlay);
+                }
+                ui.separator();
+                if ui.button("Create").clicked() {
+                    result = Some(RoxyAction::ToolBarCreate);
+                }
+                if ui.button("Edit").clicked() {
+                    result = Some(RoxyAction::ToolBarEdit);
+                }
+                ui.separator();
+                if ui.button("Duplicate").clicked() {
+                    result = Some(RoxyAction::ToolBarDuplicate);
+                }
+                if ui.button("Delete").clicked() {
+                    result = Some(RoxyAction::ToolBarDelete);
+                }
+            });
+            ui.menu_button("Help", |ui| {
+                if ui.button("Nothing").clicked() {
+                    result = Some(RoxyAction::ToolBarHelp);
+                }
+            })
         });
-        ui.menu_button("Help", |ui| {
-            if ui.button("Nothing").clicked() {
-                todo!();
-            }
-        })
-    });
+        result
+    }
 }

@@ -3,7 +3,10 @@ use std::{
     env::home_dir,
     fs,
     path::{Path, PathBuf},
-    sync::{Mutex, OnceLock},
+    sync::{
+        Mutex, OnceLock,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
 use egui::{Button, CentralPanel};
@@ -13,11 +16,12 @@ use crate::{
     core::boot::on_booting,
     error::RoxyResult,
     profile::Profile,
-    ui,
+    ui::{self, RoxyMainComponents, dialogs::DialogsStates},
     utils::{LaunchResult, new_launch_result},
 };
 
 pub static DEFAULT_LAUNCHER_DIR: &'static str = "~/.local/share/roxy";
+static BOOTED: AtomicBool = AtomicBool::new(false);
 
 pub struct RoxyLauncher {
     pub message: Option<String>,
@@ -25,9 +29,11 @@ pub struct RoxyLauncher {
     pub launch_result: LaunchResult,
     pub launching: bool,
     pub profiles: Vec<Profile>,
+    pub dialogs: DialogsStates,
+    pub components: RoxyMainComponents,
 }
 
-impl<'a> RoxyLauncher {
+impl RoxyLauncher {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let _ = cc;
         if !Profile::profile_root().exists() {
@@ -48,10 +54,18 @@ impl<'a> RoxyLauncher {
 
 impl<'a> eframe::App for RoxyLauncher {
     fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        on_booting(self);
+        if !BOOTED.load(Ordering::Acquire) {
+            on_booting(self);
+        }
+        BOOTED.store(true, Ordering::Release);
     }
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        egui::Panel::top("menubar").show_inside(ui, |ui| ui::toolbar::show(ui));
+        egui::Panel::top("menubar").show_inside(ui, |ui| {
+            let action = self.components.toolbar.show(ui);
+            self.handle_toolbar_action(ui, action);
+        });
+        let action = self.dialogs.poll(ui);
+        self.handle_action(action, ui);
     }
 }
 
@@ -63,6 +77,8 @@ impl<'a> Default for RoxyLauncher {
             launch_result: new_launch_result(),
             launching: false,
             profiles: vec![],
+            dialogs: DialogsStates::default(),
+            components: RoxyMainComponents::default(),
         }
     }
 }

@@ -1,17 +1,37 @@
 use std::{fs, path::Path};
 
-use tracing::error;
+use tracing::{error, info};
 
 use crate::{
     error::{RoxyError, RoxyResult},
     profile::Profile,
+    utils::path_util,
 };
 
 impl Profile {
     pub fn save(&self, path: &Path) -> RoxyResult<()> {
+        if !path.exists() {
+            match fs::create_dir_all(path) {
+                Ok(_) => {}
+                Err(e) => {
+                    error!(
+                        "Error on create parent dir at {}: {}",
+                        path.to_string_lossy(),
+                        e
+                    );
+                    return Err(RoxyError::IOError(e.to_string()));
+                }
+            }
+        }
+        let path = path.join("profile.toml");
+
         match toml::to_string(self) {
             Ok(contents) => match fs::write(path, contents) {
-                Ok(_) => Ok(()),
+                Ok(_) => {
+                    info!("Succssfully save all profile");
+
+                    Ok(())
+                }
                 Err(e) => Err(RoxyError::IOError(e.to_string())),
             },
             Err(e) => Err(RoxyError::ProfileParseError(e.to_string())),
@@ -49,6 +69,7 @@ impl Profile {
                 }
             }
         }
+        info!("Succssfully save all profile");
         Ok(())
     }
 }

@@ -9,6 +9,7 @@ pub enum RoxyError {
     GameNotInstalled,
     IOError(String),
     ProfileParseError(String),
+    DialogError(String),
 }
 
 pub type RoxyResult<T = ()> = Result<T, RoxyError>;
@@ -33,6 +34,7 @@ impl Display for RoxyError {
             Self::GameNotInstalled => f.write_str("Steam or Slay the Spire 2 is not installed"),
             Self::IOError(message) => write!(f, "{message}"),
             Self::ProfileParseError(message) => write!(f, "{message}"),
+            Self::DialogError(message) => write!(f, "{message}"),
         }
     }
 }

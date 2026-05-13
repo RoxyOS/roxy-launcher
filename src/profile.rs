@@ -21,7 +21,7 @@ pub struct Profile {
     pub version_sts: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub struct ProfileData {
     pub icon_uri: PathBuf,
     pub exe_uri: PathBuf,
@@ -56,7 +56,7 @@ impl<'a> Profile {
     pub(crate) fn profile_root() -> PathBuf {
         home_dir()
             .expect("HOME is not set")
-            .join("/.local/share/roxy")
+            .join(".local/share/roxy")
     }
 }
 

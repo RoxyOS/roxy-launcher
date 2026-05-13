@@ -25,6 +25,9 @@ async fn main() -> eframe::Result {
     eframe::run_native(
         TITLE,
         native_options,
-        Box::new(|cc| Ok(Box::new(RoxyLauncher::new(cc)))),
+        Box::new(|cc| {
+            egui_extras::install_image_loaders(&cc.egui_ctx);
+            Ok(Box::new(RoxyLauncher::new(cc)))
+        }),
     )
 }
