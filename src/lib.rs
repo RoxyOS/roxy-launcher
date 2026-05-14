@@ -4,6 +4,7 @@ mod app;
 pub mod core;
 mod error;
 mod game;
+pub mod language;
 mod profile;
 pub mod ui;
 pub mod utils;

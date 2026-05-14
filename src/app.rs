@@ -15,6 +15,7 @@ use egui_notify::Toasts;
 use crate::{
     core::boot::on_booting,
     error::RoxyResult,
+    language::LangHelper,
     profile::Profile,
     ui::{self, RoxyMainComponents, dialogs::DialogsStates},
     utils::{LaunchResult, new_launch_result},
@@ -31,6 +32,7 @@ pub struct RoxyLauncher {
     pub profiles: Vec<Profile>,
     pub dialogs: DialogsStates,
     pub components: RoxyMainComponents,
+    pub lang_helper: LangHelper,
 }
 
 impl RoxyLauncher {
@@ -52,7 +54,7 @@ impl RoxyLauncher {
     }
 }
 
-impl<'a> eframe::App for RoxyLauncher {
+impl eframe::App for RoxyLauncher {
     fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         if !BOOTED.load(Ordering::Acquire) {
             on_booting(self);
@@ -69,7 +71,7 @@ impl<'a> eframe::App for RoxyLauncher {
     }
 }
 
-impl<'a> Default for RoxyLauncher {
+impl Default for RoxyLauncher {
     fn default() -> Self {
         Self {
             message: None,
@@ -79,6 +81,7 @@ impl<'a> Default for RoxyLauncher {
             profiles: vec![],
             dialogs: DialogsStates::default(),
             components: RoxyMainComponents::default(),
+            lang_helper: LangHelper::default(),
         }
     }
 }

@@ -52,7 +52,7 @@ impl CreateProfileDialogState {
                                     .hint_text("/path/to/your/image"),
                             );
                         });
-                        let absolute_image_path = expand_home_dir_string(self.image_path.clone());
+                        let absolute_image_path = expand_home_dir_string(&self.image_path);
                         ui.add(egui::Image::new(
                             match Url::from_file_path(absolute_image_path) {
                                 Ok(ok) => ok.to_string(),

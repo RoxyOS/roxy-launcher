@@ -23,3 +23,8 @@ Tests currently live inline under `#[cfg(test)]` modules inside the relevant sou
 
 ## Commit & Pull Request Guidelines
 Recent history uses short, imperative commit subjects such as `format`, `clean unused imports`, and `added some tests`. Keep commit titles brief, lowercase is acceptable, and describe one logical change per commit. Pull requests should summarize behavior changes, mention any user-visible UI impact, and list the verification commands you ran. Include screenshots when changing the `egui` interface.
+
+## Recent Task Notes
+- `src/language/load.rs` now loads language resources from YAML files using `serde_yaml`.
+- Missing translation keys fall back to `DEFAULT_EN_LANG_MAP`, then to the key string itself.
+- A `cargo check` attempt after this change was blocked by an existing dependency issue in `Cargo.toml`: the crate name is written as `egui_notify`, but crates.io expects `egui-notify`.
