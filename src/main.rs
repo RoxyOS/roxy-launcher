@@ -11,7 +11,7 @@ static DEFUALT_LOG_PATH: &str = "~/.local/state/roxy/log.log";
 #[tokio::main]
 async fn main() -> eframe::Result {
     logger_util::init_logging(
-        path_util::expand_home_dir_string(DEFUALT_LOG_PATH.to_string()).as_str(),
+        path_util::expand_home_dir_string(DEFUALT_LOG_PATH).as_str(),
         true,
     )
     .await;
@@ -25,6 +25,9 @@ async fn main() -> eframe::Result {
     eframe::run_native(
         TITLE,
         native_options,
-        Box::new(|cc| Ok(Box::new(RoxyLauncher::new(cc)))),
+        Box::new(|cc| {
+            egui_extras::install_image_loaders(&cc.egui_ctx);
+            Ok(Box::new(RoxyLauncher::new(cc)))
+        }),
     )
 }

@@ -1,0 +1,11 @@
+{
+	"$schema": "https://codeberg.org/mfussenegger/dapconfig-schema/raw/branch/master/dapconfig-schema.json",
+	"configurations": [
+		{
+			"name": "build normaly",
+			"program": "${workspaceFolder}/target/debug/roxy-launcher",
+			"type": "codelldb",
+			"request": "launch"
+		}
+	]
+}

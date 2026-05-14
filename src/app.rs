@@ -3,7 +3,10 @@ use std::{
     env::home_dir,
     fs,
     path::{Path, PathBuf},
-    sync::{Mutex, OnceLock},
+    sync::{
+        Mutex, OnceLock,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
 use egui::{Button, CentralPanel};
@@ -12,27 +15,33 @@ use egui_notify::Toasts;
 use crate::{
     core::boot::on_booting,
     error::RoxyResult,
-    profile::{Profile, profile_root},
-    ui,
+    language::LangHelper,
+    profile::Profile,
+    ui::{self, RoxyMainComponents, dialogs::DialogsStates},
     utils::{LaunchResult, new_launch_result},
 };
 
 pub static DEFAULT_LAUNCHER_DIR: &'static str = "~/.local/share/roxy";
+static BOOTED: AtomicBool = AtomicBool::new(false);
 
-pub struct RoxyLauncher<'a> {
-    pub current_profile: Profile<'a>,
+pub struct RoxyLauncher {
     pub message: Option<String>,
     pub toasts: Toasts,
     pub launch_result: LaunchResult,
     pub launching: bool,
+    pub profiles: Vec<Profile>,
+    pub dialogs: DialogsStates,
+    pub components: RoxyMainComponents,
+    pub lang_helper: LangHelper,
 }
 
-impl<'a> RoxyLauncher<'a> {
+impl RoxyLauncher {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let _ = cc;
-        if !profile_root().exists() {
-            fs::create_dir_all(profile_root());
+        if !Profile::profile_root().exists() {
+            fs::create_dir_all(Profile::profile_root());
         }
+
         Default::default()
     }
 
@@ -45,23 +54,34 @@ impl<'a> RoxyLauncher<'a> {
     }
 }
 
-impl<'a> eframe::App for RoxyLauncher<'a> {
+impl eframe::App for RoxyLauncher {
     fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        on_booting(self);
+        if !BOOTED.load(Ordering::Acquire) {
+            on_booting(self);
+        }
+        BOOTED.store(true, Ordering::Release);
     }
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        egui::Panel::top("menubar").show_inside(ui, |ui| ui::toolbar::show(ui));
+        egui::Panel::top("menubar").show_inside(ui, |ui| {
+            let action = self.components.toolbar.show(ui);
+            self.handle_toolbar_action(ui, action);
+        });
+        let action = self.dialogs.poll(ui);
+        self.handle_action(action, ui);
     }
 }
 
-impl<'a> Default for RoxyLauncher<'a> {
+impl Default for RoxyLauncher {
     fn default() -> Self {
         Self {
-            current_profile: Profile::from("default".to_string()),
             message: None,
             toasts: Toasts::default(),
             launch_result: new_launch_result(),
             launching: false,
+            profiles: vec![],
+            dialogs: DialogsStates::default(),
+            components: RoxyMainComponents::default(),
+            lang_helper: LangHelper::default(),
         }
     }
 }
